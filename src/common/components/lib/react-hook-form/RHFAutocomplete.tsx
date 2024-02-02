@@ -15,7 +15,10 @@ interface Props<
   name: string;
   label?: string;
   helperText?: React.ReactNode;
-  onChange?: (event: React.SyntheticEvent, value: AutocompleteValue<T, Multiple, DisableClearable, FreeSolo>) => void;
+  onChange?: (
+    event: React.SyntheticEvent,
+    value: AutocompleteValue<T, Multiple, DisableClearable, FreeSolo>
+  ) => void;
 }
 
 const RHFAutocomplete = <

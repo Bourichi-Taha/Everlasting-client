@@ -1,9 +1,9 @@
 import { CrudLabels } from '@common/defs/types';
 
-interface EventsLabels extends CrudLabels{
-    ViewOne:string;
+interface EventsLabels extends CrudLabels {
+  ViewOne: string;
 }
-const Labels : EventsLabels = {
+const Labels: EventsLabels = {
   CreateNewOne: 'Créer un nouvel événement',
   NewOne: 'Nouvel événement',
   ReadAll: 'Liste des événements',

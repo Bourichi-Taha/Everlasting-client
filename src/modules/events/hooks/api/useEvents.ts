@@ -5,15 +5,14 @@ import useItems, { UseItemsHook, UseItemsOptions, defaultOptions } from '@common
 import { Event } from '@modules/events/defs/types';
 import { Dayjs } from 'dayjs';
 
-
 export interface CreateOneInput {
   name: string;
   locationId: Id;
   description: string;
   maxNumParticipants: number;
   date: string | Date;
-  startTime:string | Date;
-  endTime:string | Date;
+  startTime: string | Date;
+  endTime: string | Date;
   imageId: Id;
   categoryId: Id;
 }
@@ -25,8 +24,8 @@ export interface UpdateOneInput {
   maxNumParticipants: number;
   date: string | Date | Dayjs;
   imageId?: Id;
-  startTime:string;
-  endTime:string;
+  startTime: string;
+  endTime: string;
   categoryId: Id;
 }
 export interface Subscribe {
@@ -37,8 +36,8 @@ export type UpsertOneInput = CreateOneInput | UpdateOneInput;
 export type EventsData<Event> = { items: Event[] };
 export type EventData<Event> = { item: Event };
 interface UseEventsHook extends UseItemsHook<Event, CreateOneInput, UpdateOneInput> {
-  readAllOwn: (options?: FetchApiOptions) => Promise<ApiResponse<EventsData<Event>>>;//fetch all events created by the user
-  readAllRegistered: (options?: FetchApiOptions) => Promise<ApiResponse<EventsData<Event>>>;//fetch all events that the user registered in
+  readAllOwn: (options?: FetchApiOptions) => Promise<ApiResponse<EventsData<Event>>>; // fetch all events created by the user
+  readAllRegistered: (options?: FetchApiOptions) => Promise<ApiResponse<EventsData<Event>>>; // fetch all events that the user registered in
   subscribe: (
     input: Subscribe,
     options?: FetchApiOptions
@@ -99,11 +98,13 @@ const useEvents = (opts: UseItemsOptions = defaultOptions): UseEventsHook => {
     return response;
   };
   const deleteOne = async (id: Id, options?: FetchApiOptions) => {
-    let response;
-    response = await fetchApi<EventData<Event>>(apiRoutes.Cancel.replace('{id}', id.toString()), {
+    const response = await fetchApi<EventData<Event>>(
+      apiRoutes.Cancel.replace('{id}', id.toString()),
+      {
         method: 'PUT',
         ...options,
-      });
+      }
+    );
 
     if (response.success) {
       useItemsHook.mutate();
