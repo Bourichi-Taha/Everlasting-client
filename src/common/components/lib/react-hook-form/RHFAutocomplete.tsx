@@ -1,4 +1,4 @@
-import { useFormContext, Controller } from 'react-hook-form';
+import { useFormContext, Controller, ControllerRenderProps, FieldValues } from 'react-hook-form';
 import { Autocomplete, AutocompleteProps, AutocompleteValue, TextField } from '@mui/material';
 
 export type SelectOption = {
@@ -14,6 +14,10 @@ interface Props<
 > extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
   name: string;
   label?: string;
+  transformValue?: (
+    value: AutocompleteValue<T, Multiple, DisableClearable, FreeSolo>,
+    field: ControllerRenderProps<FieldValues, string>
+  ) => void;
   helperText?: React.ReactNode;
   onChange?: (
     event: React.SyntheticEvent,
@@ -54,7 +58,11 @@ const RHFAutocomplete = <
             />
           )}
           onChange={(event, value) => {
-            field.onChange(value);
+            if (other.transformValue) {
+              other.transformValue(value, field);
+            } else {
+              field.onChange(value);
+            }
             if (other.onChange) {
               other.onChange(event, value);
             }

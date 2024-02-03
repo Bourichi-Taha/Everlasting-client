@@ -31,6 +31,7 @@ const RHFImageDropzone = ({ name, label, helperText, ...other }: Props) => {
           sx={{
             position: 'relative',
             display: 'flex',
+            flex: 1,
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',

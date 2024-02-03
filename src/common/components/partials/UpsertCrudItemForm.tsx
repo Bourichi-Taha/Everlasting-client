@@ -81,17 +81,8 @@ const UpsertCrudItemForm = <
   }: UpsertCrudItemFormProps<Item, CreateOneInput, UpdateOneInput, TAB_ENUM>,
   ref: Ref<CurrentFormStepRef | undefined>
 ) => {
-  const {
-    item,
-    routes,
-    useItems,
-    schema,
-    defaultValues,
-    children,
-    tabs,
-    onPreSubmit,
-    onPostSubmit,
-  } = props;
+  const { item, useItems, schema, defaultValues, children, tabs, onPreSubmit, onPostSubmit } =
+    props;
   const { enqueueSnackbar } = useSnackbar();
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();

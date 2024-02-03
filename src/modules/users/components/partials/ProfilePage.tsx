@@ -6,7 +6,7 @@ import useAuth from '@modules/auth/hooks/api/useAuth';
 import { Event } from '@modules/events/defs/types';
 import useEvents from '@modules/events/hooks/api/useEvents';
 import { User } from '@modules/users/defs/types';
-import { Box, Button, Card, Divider, Grid, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Card, Divider, Grid, Tooltip } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

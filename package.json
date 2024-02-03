@@ -20,6 +20,7 @@
     "@mui/x-date-pickers": "^6.0.4",
     "@types/node": "18.11.18",
     "@types/react-dom": "^18.2.17",
+    "country-state-city": "^3.2.1",
     "dayjs": "^1.11.7",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-next": "^14.0.3",
