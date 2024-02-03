@@ -2,7 +2,7 @@ import withAuth, { AUTH_MODE } from '@modules/auth/hocs/withAuth';
 import withPermissions from '@modules/permissions/hocs/withPermissions';
 import { NextPage } from 'next';
 import Routes from '@common/defs/routes';
-import UsersTable from '@modules/users/components/partials/UsersTable';
+// import UsersTable from '@modules/users/components/partials/UsersTable';
 import CustomBreadcrumbs from '@common/components/lib/navigation/CustomBreadCrumbs';
 import { useRouter } from 'next/router';
 import { Add } from '@mui/icons-material';
@@ -30,7 +30,7 @@ const UsersPage: NextPage = () => {
       <CustomBreadcrumbs
         links={[{ name: 'Dashboard', href: Routes.Common.Home }, { name: Labels.Users.Items }]}
       />
-      <UsersTable />
+      {/* <UsersTable /> */}
     </>
   );
 };

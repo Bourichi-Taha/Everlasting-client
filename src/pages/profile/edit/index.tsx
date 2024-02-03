@@ -6,32 +6,38 @@ import PageHeader from '@common/components/lib/partials/PageHeader';
 import CustomBreadcrumbs from '@common/components/lib/navigation/CustomBreadCrumbs';
 import { CRUD_ACTION } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
-import Labels from '@common/defs/labels';
-// import CreateUserStepper from '@modules/users/components/partials/CreateUserStepper';
+import useAuth from '@modules/auth/hooks/api/useAuth';
+import UpdateUserForm from '@modules/users/components/partials/UpdateUserForm';
 
-const UsersPage: NextPage = () => {
+const UserPage: NextPage = () => {
+  const { user } = useAuth();
+
   return (
     <>
-      <PageHeader title={Labels.Users.CreateNewOne} />
+      <PageHeader title="Mon Profil" />
       <CustomBreadcrumbs
         links={[
           { name: 'Dashboard', href: Routes.Common.Home },
-          { name: Labels.Users.Items, href: Routes.Users.ReadAll },
-          { name: Labels.Users.NewOne },
+          { name: 'Mon profil', href: Routes.Users.Profile },
+          { name: 'Modifier' },
         ]}
       />
-      {/* <CreateUserStepper /> */}
-      {/* <CreateUserForm /> */}
+
+      {user && <UpdateUserForm item={user} />}
     </>
   );
 };
 
 export default withAuth(
-  withPermissions(UsersPage, {
+  withPermissions(UserPage, {
     requiredPermissions: [
       {
         entity: Namespaces.Users,
-        action: CRUD_ACTION.CREATE,
+        action: CRUD_ACTION.UPDATE,
+      },
+      {
+        entity: Namespaces.Users,
+        action: CRUD_ACTION.READ,
       },
     ],
     redirectUrl: Routes.Permissions.Forbidden,

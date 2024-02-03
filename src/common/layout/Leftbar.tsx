@@ -75,6 +75,11 @@ const Leftbar = (props: LeftbarProps) => {
         icon: <DashboardCustomizeRoundedIcon />,
         link: Routes.Common.Home,
       });
+      managementGroup.items.push({
+        text: 'Profil',
+        icon: <AccountBoxRoundedIcon />,
+        link: Routes.Users.Profile,
+      });
       pushCrudNavItem(
         {
           icon: <AccountBoxRoundedIcon />,

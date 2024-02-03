@@ -14,12 +14,14 @@ export interface FetchApiOptions {
   verbose?: boolean;
   displaySuccess?: boolean;
   displayProgress?: boolean;
+  softDelete?: boolean;
 }
 
 export interface ApiOptions extends FetchApiOptions {
   headers?: HeadersInit;
   body?: Any;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  formData?: boolean;
 }
 
 const useApi = () => {
@@ -34,8 +36,10 @@ const useApi = () => {
       }
       const authToken = localStorage.getItem('authToken');
       const headers: Headers = new Headers();
-      headers.set('Content-Type', 'application/json');
       headers.set('Accept', 'application/json');
+      if (!options?.formData) {
+        headers.set('Content-Type', 'application/json');
+      }
       if (authToken) {
         headers.set('Authorization', `Bearer ${authToken}`);
       }
@@ -52,10 +56,18 @@ const useApi = () => {
       if (verbose) {
         console.log(`useApi: requesting ${url}`, options);
       }
+      let body;
+      if (options?.body) {
+        if (options.formData) {
+          body = options.body;
+        } else {
+          body = JSON.stringify(options.body);
+        }
+      }
       const response = await fetch(url, {
         method,
         headers,
-        body: options?.body ? JSON.stringify(options.body) : undefined,
+        body,
       });
       const jsonResponse: ApiResponse<T> = await response.json();
       if (verbose) {

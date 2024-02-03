@@ -1,22 +1,145 @@
 import ApiRoutes from '@common/defs/apiRoutes';
 import { Upload } from '@modules/uploads/defs/types';
-import useItems, { UseItems, UseItemsOptions, defaultOptions } from '@common/hooks/useItems';
+import useApi, { ApiResponse, FetchApiOptions } from '@common/hooks/useApi';
+import { Id } from '@common/defs/types';
+import useSWRImmutable from 'swr';
+import { useEffect, useState } from 'react';
 
 export interface CreateOneInput {
   name?: string;
   file: File;
 }
 
-export interface UpdateOneInput extends CreateOneInput {}
+export type UpdateOneInput = CreateOneInput;
 
-export type UpsertOneInput = CreateOneInput | UpdateOneInput;
+export interface UpsertUploadsInput extends CreateOneInput {}
 
-const useUploads: UseItems<Upload, CreateOneInput, UpdateOneInput> = (
-  opts: UseItemsOptions = defaultOptions
-) => {
-  const apiRoutes = ApiRoutes.Uploads;
-  const useItemsHook = useItems<Upload, CreateOneInput, UpdateOneInput>(apiRoutes, opts);
-  return useItemsHook;
+interface UseUploadsResponse {
+  items: Upload[] | null;
+  createOne: (
+    _input: CreateOneInput,
+    options?: FetchApiOptions
+  ) => Promise<ApiResponse<{ item: Upload }>>;
+  readOne: (id: Id, options?: FetchApiOptions) => Promise<ApiResponse<{ item: Upload }>>;
+  readAll: (options?: FetchApiOptions) => Promise<ApiResponse<{ items: Upload[] }>>;
+  updateOne: (
+    id: Id,
+    _input: UpdateOneInput,
+    options?: FetchApiOptions
+  ) => Promise<ApiResponse<{ item: Upload }>>;
+  deleteOne: (id: Id, options?: FetchApiOptions) => Promise<ApiResponse<{ item: Upload | null }>>;
+}
+
+interface UseUploadsOptions {
+  fetchItems?: boolean;
+}
+const defaultOptions = {
+  fetchItems: false,
+};
+
+const useUploads = (opts: UseUploadsOptions = defaultOptions): UseUploadsResponse => {
+  const fetchApi = useApi();
+
+  const { data, mutate } = useSWRImmutable<Upload[] | null>(
+    opts.fetchItems ? ApiRoutes.Uploads.ReadAll : null,
+    async (_url: string) => {
+      const response = await readAll();
+      return response.data?.items ?? null;
+    }
+  );
+
+  const [items, setItems] = useState<Upload[] | null>(null);
+
+  useEffect(() => {
+    setItems(data ?? null);
+  }, [data]);
+
+  const createOne = async (
+    input: CreateOneInput,
+    options?: FetchApiOptions
+  ): Promise<ApiResponse<{ item: Upload }>> => {
+    const formData = new FormData();
+    formData.append('file', input.file);
+    const response = await fetchApi<{ item: Upload }>(ApiRoutes.Uploads.CreateOne, {
+      method: 'POST',
+      body: formData,
+      ...options,
+      formData: true,
+    });
+
+    if (response.success) {
+      mutate();
+    }
+
+    return response;
+  };
+
+  const readOne = async (id: Id, options?: FetchApiOptions) => {
+    const response = await fetchApi<{ item: Upload }>(
+      ApiRoutes.Uploads.ReadOne.replace('{id}', id.toString()),
+      options
+    );
+
+    return response;
+  };
+  const readAll = async (options?: FetchApiOptions) => {
+    const response = await fetchApi<{ items: Upload[] }>(ApiRoutes.Uploads.ReadAll, options);
+
+    if (response.success) {
+      setItems(response.data?.items ?? null);
+    }
+
+    return response;
+  };
+
+  const updateOne = async (
+    id: Id,
+    input: UpdateOneInput,
+    options?: FetchApiOptions
+  ): Promise<ApiResponse<{ item: Upload }>> => {
+    const formData = new FormData();
+    formData.append('file', input.file);
+    const response = await fetchApi<{ item: Upload }>(
+      ApiRoutes.Uploads.UpdateOne.replace('{id}', id.toString()),
+      {
+        method: 'POST',
+        body: formData,
+        ...options,
+        formData: true,
+      }
+    );
+
+    if (response.success) {
+      mutate();
+    }
+
+    return response;
+  };
+
+  const deleteOne = async (id: Id, options?: FetchApiOptions) => {
+    const response = await fetchApi<{ item: Upload }>(
+      ApiRoutes.Uploads.DeleteOne.replace('{id}', id.toString()),
+      {
+        method: 'DELETE',
+        ...options,
+      }
+    );
+
+    if (response.success) {
+      mutate();
+    }
+
+    return response;
+  };
+
+  return {
+    items,
+    createOne,
+    readOne,
+    readAll,
+    updateOne,
+    deleteOne,
+  };
 };
 
 export default useUploads;

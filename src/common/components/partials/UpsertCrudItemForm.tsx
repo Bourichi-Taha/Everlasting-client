@@ -188,7 +188,7 @@ const UpsertCrudItemForm = <
                     <Button
                       size="large"
                       variant="text"
-                      onClick={() => router.push(routes.ReadAll)}
+                      onClick={() => router.back()}
                       sx={{ marginRight: 2 }}
                     >
                       Retour
