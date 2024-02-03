@@ -141,10 +141,12 @@ const CreateEventWithUploadForm = () => {
     }
   };
   const transformValue = (
-    value: ICity | ICountry | IState,
+    value: NonNullable<ICity | ICountry | IState | string> | null,
     field: ControllerRenderProps<FieldValues, string>
   ) => {
-    field.onChange(value.name);
+    if (value && typeof value !== 'string') {
+      field.onChange(value.name);
+    }
   };
   return (
     <>
@@ -163,6 +165,7 @@ const CreateEventWithUploadForm = () => {
                 transformValue={transformValue}
                 options={Country.getAllCountries()}
                 name="country"
+                multiple={false}
                 label={EventsInputLabels.country}
                 getOptionLabel={(option) => {
                   if (typeof option === 'string') return option;
@@ -174,6 +177,7 @@ const CreateEventWithUploadForm = () => {
             <Grid item xs={12} sm={12} md={6}>
               <RHFAutocomplete
                 transformValue={transformValue}
+                multiple={false}
                 options={State.getStatesOfCountry(country?.isoCode as string) as IState[]}
                 name="stateProvince"
                 label={EventsInputLabels.stateProvince}
@@ -187,6 +191,7 @@ const CreateEventWithUploadForm = () => {
             <Grid item xs={12} sm={12} md={6}>
               <RHFAutocomplete
                 transformValue={transformValue}
+                multiple={false}
                 options={
                   City.getCitiesOfState(
                     country?.isoCode as string,
