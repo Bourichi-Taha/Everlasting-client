@@ -3,7 +3,6 @@ import { Id } from '@common/defs/types';
 import useApi, { ApiResponse, FetchApiOptions } from '@common/hooks/useApi';
 import useItems, { UseItemsHook, UseItemsOptions, defaultOptions } from '@common/hooks/useItems';
 import { Event } from '@modules/events/defs/types';
-import { Location } from '@modules/locations/defs/types';
 import { Upload } from '@modules/uploads/defs/types';
 import { Dayjs } from 'dayjs';
 
@@ -36,7 +35,11 @@ export interface UpdateOneInput {
   endTime: string;
   categoryId: Id;
   image?: File | Upload;
-  location?: Location;
+  country: string;
+  city: string;
+  stateProvince: string;
+  address: string;
+  postalCode: string;
 }
 export interface Subscribe {
   eventId: number;

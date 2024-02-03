@@ -116,7 +116,7 @@ const ProfilePage = (props: ProfilePageProps) => {
                 alt="avatar."
                 src={
                   item.avatar
-                    ? 'http://127.0.0.1:8000' + item.avatar.path
+                    ? process.env.NEXT_PUBLIC_API_URL + item.avatar.path
                     : '/images/illustrations/Image_not_available_icon.png'
                 }
               />

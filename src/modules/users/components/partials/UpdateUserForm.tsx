@@ -96,9 +96,6 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     transition: 'all 0.3s',
-                    '.avatar': {
-                      position: 'inherit !important',
-                    },
                   }}
                 >
                   {item.avatar && (
@@ -112,7 +109,7 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
                         position: 'inherit !important',
                       }}
                       alt="avatar."
-                      src={'http://127.0.0.1:8000' + item.avatar.path}
+                      src={process.env.NEXT_PUBLIC_API_URL + item.avatar.path}
                     />
                   )}
                 </Box>

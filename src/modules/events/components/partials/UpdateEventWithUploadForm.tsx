@@ -3,8 +3,9 @@ import FormProvider, {
   RHFSelect,
   RHFTextField,
 } from '@common/components/lib/react-hook-form';
-import useEvents, { CreateOneInput } from '@modules/events/hooks/api/useEvents';
-import { Card, Grid, MenuItem } from '@mui/material';
+import { Event } from '@modules/events/defs/types';
+import useEvents, { UpdateOneInput } from '@modules/events/hooks/api/useEvents';
+import { Box, Card, Grid, MenuItem, Tooltip } from '@mui/material';
 import * as Yup from 'yup';
 import RHFDatePicker from '@common/components/lib/react-hook-form/RHFDatePicker';
 import { Category } from '@modules/categories/defs/types';
@@ -18,28 +19,34 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import useUploads from '@modules/uploads/hooks/api/useUploads';
 import { useRouter } from 'next/router';
 import Routes from '@common/defs/routes';
-import RHFTimePicker from '@common/components/lib/react-hook-form/RHFTimePicker';
-import { useState } from 'react';
+import useUtils from '@common/hooks/useUtils';
 import useLocations from '@modules/locations/hooks/api/useLocations';
 import { EventsInputLabels } from '@modules/events/defs/labels';
-import useUtils from '@common/hooks/useUtils';
+import { useState } from 'react';
+import RHFTimePicker from '@common/components/lib/react-hook-form/RHFTimePicker';
 
-const CreateEventWithUploadForm = () => {
+interface UpdateEventFormProps {
+  event: Event;
+}
+
+const UpdateEventWithUploadForm = (props: UpdateEventFormProps) => {
+  const { event } = props;
   const router = useRouter();
-
-  const { items } = useCategories({ fetchItems: true });
-  const { createOne } = useEvents();
-  const { createOne: createOneUpload } = useUploads();
-  const { createOne: createOneLocation } = useLocations();
-  const [country, setCountry] = useState<string>('');
   const {
-    isEndTimeLaterThanStartTime,
     formatDate,
     formatHours,
+    isEndTimeLaterThanStartTime,
+    transformToCustomFormat,
     getAllCitiesNamesOfCountry,
     getAllCountryNames,
     getAllStatesNamesOfCountry,
+    isEventDateGreaterThanToday,
   } = useUtils();
+  const { items } = useCategories({ fetchItems: true });
+  const { createOne: createOneLocation, updateOne: updateOneLocation } = useLocations();
+  const { updateOne: updateOneEvent } = useEvents();
+  const { createOne: createOneUpload, updateOne: updateOneUpload } = useUploads();
+  const [country, setCountry] = useState<string>(event.location.country);
   const currentDate = dayjs().startOf('day');
   const minDate = currentDate.add(1, 'day');
   const maxDate = currentDate.add(1, 'year').add(1, 'day');
@@ -60,16 +67,14 @@ const CreateEventWithUploadForm = () => {
       .max(maxDate, 'Veuillez choisir une date dans la limite')
       .typeError("La date n'est pas valide"),
     categoryId: Yup.number().required('Le champ est obligatoire'),
-    image: Yup.mixed()
-      .test('fileType', 'Format de fichier non valide', (value) => {
-        if (!value) {
-          return true; // No file provided, so no validation needed
-        }
-        const file = value as File;
-        const acceptedFormats = ['image/jpeg', 'image/png', 'image/jpg']; // Add more formats as needed
-        return acceptedFormats.includes(file.type);
-      })
-      .required('Le champ est obligatoire'),
+    image: Yup.mixed().test('fileType', 'Format de fichier non valide', (value) => {
+      if (!value) {
+        return true; // No file provided, so no validation needed
+      }
+      const file = value as File;
+      const acceptedFormats = ['image/jpeg', 'image/png', 'image/jpg']; // Add more formats as needed
+      return acceptedFormats.includes(file.type);
+    }),
     startTime: Yup.string().required('Le champ est obligatoire'),
     endTime: Yup.string()
       .required('Le champ est obligatoire')
@@ -86,14 +91,23 @@ const CreateEventWithUploadForm = () => {
         }
       ),
   });
-  const methods = useForm<CreateOneInput>({
+  const methods = useForm<UpdateOneInput>({
     resolver: yupResolver(schema),
     defaultValues: {
-      name: '',
-      description: '',
-      date: '',
-      endTime: '',
-      startTime: '',
+      name: event.name,
+      locationId: event.locationId,
+      description: event.description,
+      maxNumParticipants: event.maxNumParticipants,
+      date: dayjs(event.date),
+      imageId: event.imageId,
+      categoryId: event.categoryId,
+      endTime: transformToCustomFormat(event.endTime),
+      startTime: transformToCustomFormat(event.startTime),
+      address: event.location.address,
+      postalCode: event.location.postalCode,
+      stateProvince: event.location.stateProvince,
+      city: event.location.city,
+      country: event.location.country,
     },
   });
 
@@ -101,15 +115,21 @@ const CreateEventWithUploadForm = () => {
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
-  const onSubmit = async (data: CreateOneInput) => {
+  const onSubmit = async (data: UpdateOneInput) => {
+    if (!event) return;
     data.date = formatDate(data.date);
     data.startTime = formatHours(data.startTime);
     data.endTime = formatHours(data.endTime);
     if (data.image) {
-      const dataUpload = { file: data.image };
-      const uploadResponse = await createOneUpload(dataUpload);
+      let uploadResponse;
+      const dataUpload = { file: data.image as File };
+      if (event.imageId) {
+        uploadResponse = await updateOneUpload(event.imageId, dataUpload);
+      } else {
+        uploadResponse = await createOneUpload(dataUpload);
+      }
       if (uploadResponse.success) {
-        data.imageId = uploadResponse.data?.item.id as number;
+        data.imageId = uploadResponse.data?.item.id;
       }
     }
     const dataLocation = {
@@ -119,11 +139,19 @@ const CreateEventWithUploadForm = () => {
       address: data.address,
       stateProvince: data.stateProvince,
     };
-    const locationResponse = await createOneLocation(dataLocation);
+    let locationResponse;
+    if (event.locationId) {
+      locationResponse = await updateOneLocation(event.locationId, dataLocation);
+    } else {
+      locationResponse = await createOneLocation(dataLocation);
+    }
     if (locationResponse.success && locationResponse.data) {
       data.locationId = locationResponse.data.item.id;
     }
-    const response = await createOne(data, { displayProgress: true, displaySuccess: true });
+    const response = await updateOneEvent(event.id, data, {
+      displayProgress: true,
+      displaySuccess: true,
+    });
     if (response.success) {
       router.push(Routes.Events.ReadAll);
     }
@@ -134,7 +162,40 @@ const CreateEventWithUploadForm = () => {
       <Card sx={{ maxWidth: '800px', margin: 'auto' }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container rowSpacing={3} columnSpacing={2} sx={{ padding: 5 }}>
-            <Grid item xs={12} gap={3} display="flex" alignItems="center">
+            <Grid item md={4} sm={12} gap={3} sx={{ width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                <Box
+                  sx={{
+                    width: '200px',
+                    height: '200px',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    borderWidth: 2,
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s',
+                  }}
+                >
+                  {event.image && (
+                    <Box
+                      component="img"
+                      sx={{
+                        height: 233,
+                        width: 350,
+                        maxHeight: { xs: 233, md: 167 },
+                        maxWidth: { xs: 350, md: 250 },
+                        position: 'inherit !important',
+                      }}
+                      alt="avatar."
+                      src={process.env.NEXT_PUBLIC_API_URL + event.image.path}
+                    />
+                  )}
+                </Box>
+              </Box>
+            </Grid>
+            <Grid item md={8} xs={12} gap={3} display="flex" alignItems="center">
               <RHFImageDropzone name="image" label="Choisir un nouvel image. (jpeg, png, jpg)" />
             </Grid>
 
@@ -221,16 +282,27 @@ const CreateEventWithUploadForm = () => {
               </RHFSelect>
             </Grid>
             <Grid item xs={12} sx={{ textAlign: 'center' }}>
-              <LoadingButton
-                size="large"
-                variant="contained"
-                type="submit"
-                startIcon={<LockOpen />}
-                loadingPosition="start"
-                loading={isSubmitting}
+              <Tooltip
+                title={
+                  isEventDateGreaterThanToday(event.date)
+                    ? ''
+                    : 'Vous pouvez uniquement mettre à jour les événements à venir.'
+                }
               >
-                Créer
-              </LoadingButton>
+                <Box>
+                  <LoadingButton
+                    size="large"
+                    variant="contained"
+                    type="submit"
+                    startIcon={<LockOpen />}
+                    loadingPosition="start"
+                    loading={isSubmitting}
+                    disabled={!isEventDateGreaterThanToday(event.date)}
+                  >
+                    Mettre à jour les données
+                  </LoadingButton>
+                </Box>
+              </Tooltip>
             </Grid>
           </Grid>
         </FormProvider>
@@ -239,4 +311,4 @@ const CreateEventWithUploadForm = () => {
   );
 };
 
-export default CreateEventWithUploadForm;
+export default UpdateEventWithUploadForm;
