@@ -11,6 +11,7 @@ interface Utils {
   getAllCitiesNamesOfCountry: (countryName: string) => string[];
   isEventDateGreaterThanToday: (eventDate: Date | string) => boolean;
   formatDateTime: (dateString: string, timeString: string) => string;
+  formatReadableDuration: (duration: string) => string;
 }
 
 const useUtils = (): Utils => {
@@ -111,6 +112,22 @@ const useUtils = (): Utils => {
     return `${formattedDate} à ${formattedTime}`;
   };
 
+  const formatReadableDuration = (duration: string) => {
+    // Extract hours, minutes, and seconds
+    const [hours, minutes, _seconds] = duration.split(':').map(Number);
+
+    // Create a readable format
+    let readableDuration = '';
+    if (hours > 0) {
+      readableDuration += `${hours} ${hours > 1 ? 'heures' : 'heure'} `;
+    }
+    if (minutes > 0) {
+      readableDuration += `${minutes} ${minutes > 1 ? 'minutes' : 'minute'} `;
+    }
+
+    return readableDuration.trim();
+  };
+
   return {
     formatDate,
     formatHours,
@@ -121,6 +138,7 @@ const useUtils = (): Utils => {
     getAllStatesNamesOfCountry,
     isEventDateGreaterThanToday,
     formatDateTime,
+    formatReadableDuration,
   };
 };
 
