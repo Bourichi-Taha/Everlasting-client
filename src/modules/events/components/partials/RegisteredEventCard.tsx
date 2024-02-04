@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Card,
   CardContent,
@@ -19,9 +19,9 @@ import Routes from '@common/defs/routes';
 import useEvents from '@modules/events/hooks/api/useEvents';
 import { Event } from '@modules/events/defs/types';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ConfirmDialog from '@common/components/lib/feedbacks/ConfirmDialog';
 import CategoryIcon from '@mui/icons-material/Category';
 import useUtils from '@common/hooks/useUtils';
+import useAuth from '@modules/auth/hooks/api/useAuth';
 
 // Define the interface for the component's props
 interface EventCardProps {
@@ -30,33 +30,37 @@ interface EventCardProps {
 }
 
 // EventCard component
-const UserEventCard: React.FC<EventCardProps> = (props: EventCardProps) => {
+const RegisteredEventCard: React.FC<EventCardProps> = (props: EventCardProps) => {
   const router = useRouter();
+  const { user } = useAuth();
   const { formatDateTime } = useUtils();
   const { event, fetchEvents } = props;
-  const { deleteOne } = useEvents();
-  const [toDeleteId, setToDeleteId] = useState<number | null>(null);
+  const { subscribe, unsubscribe } = useEvents();
   const theme = useTheme();
 
-  const cancelHandler = async () => {
-    if (toDeleteId !== null) {
-      const res = await deleteOne(toDeleteId, {
-        displayProgress: true,
-        displaySuccess: true,
-        softDelete: true,
-      });
-      if (res.success) {
-        setToDeleteId(null);
-        fetchEvents();
-      }
+  const onSubscribe = async () => {
+    const res = await subscribe(
+      { eventId: event.id },
+      { displayProgress: true, displaySuccess: true }
+    );
+    if (res.success) {
+      fetchEvents();
     }
   };
-  console.log(router.pathname);
+  const onUnsubscribe = async () => {
+    const res = await unsubscribe(
+      { eventId: event.id },
+      { displayProgress: true, displaySuccess: true }
+    );
+    if (res.success) {
+      fetchEvents();
+    }
+  };
 
   return (
     <Card
       sx={{
-        maxWidth: 600,
+        // maxWidth: 600,
         m: 2,
         boxShadow: 4,
         borderRadius: 2,
@@ -233,8 +237,8 @@ const UserEventCard: React.FC<EventCardProps> = (props: EventCardProps) => {
         </Typography>
       </CardContent>
       <CardActions sx={{ p: 2, bgcolor: '#e0e0e0' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
+        <Grid container spacing={2} justifyContent="space-between">
+          <Grid item xs={4} sm={3}>
             <Button
               size="small"
               variant="outlined"
@@ -246,47 +250,27 @@ const UserEventCard: React.FC<EventCardProps> = (props: EventCardProps) => {
               Détails
             </Button>
           </Grid>
-          <Grid item xs={4}>
-            <Button
-              size="small"
-              variant="contained"
-              color="secondary"
-              onClick={() =>
-                router.push(Routes.Events.UpdateOne.replace('{id}', event.id.toString()))
-              }
-            >
-              Modifier
-            </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Button
-              size="small"
-              variant="contained"
-              color="error"
-              onClick={() => setToDeleteId(event.id)}
-            >
-              Annuler
-            </Button>
+          <Grid item xs={4} sm={3}>
+            {user && !event.registeredIds?.includes(user.id) ? (
+              <Button
+                disabled={event.maxNumParticipants === event.registeredNumber}
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={onSubscribe}
+              >
+                {event.maxNumParticipants === event.registeredNumber ? 'Complet' : "S'inscrire"}
+              </Button>
+            ) : (
+              <Button size="small" variant="contained" color="error" onClick={onUnsubscribe}>
+                Annuler
+              </Button>
+            )}
           </Grid>
         </Grid>
-        <ConfirmDialog
-          open={toDeleteId !== null}
-          onClose={() => setToDeleteId(null)}
-          title="Annuler"
-          content={
-            <Typography variant="body1" color="textSecondary">
-              Êtes-vous sûr de vouloir annuler cet événement ? <br /> Cette action est irréversible.
-            </Typography>
-          }
-          action={
-            <Button variant="contained" color="error" onClick={cancelHandler}>
-              Confirmer
-            </Button>
-          }
-        />
       </CardActions>
     </Card>
   );
 };
 
-export default UserEventCard;
+export default RegisteredEventCard;

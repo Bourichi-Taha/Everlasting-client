@@ -6,12 +6,14 @@ import useAuth from '@modules/auth/hooks/api/useAuth';
 import { Event } from '@modules/events/defs/types';
 import useEvents from '@modules/events/hooks/api/useEvents';
 import { User } from '@modules/users/defs/types';
-import { Box, Button, Card, Divider, Grid, Tooltip } from '@mui/material';
+import { Box, Button, Card, Divider, Grid, Tooltip, Typography, useTheme } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { UserInputLabels } from '@modules/users/defs/labels';
 import { Email } from '@mui/icons-material';
+import NoEventsFound from '@modules/events/components/partials/NoEventsFound';
+import RegisteredEventCard from '@modules/events/components/partials/RegisteredEventCard';
 
 interface ProfilePageProps {
   item: User;
@@ -19,13 +21,13 @@ interface ProfilePageProps {
 
 const ProfilePage = (props: ProfilePageProps) => {
   const { item } = props;
-  const { readAllRegistered, mutate } = useEvents();
+  const { readAllRegistered } = useEvents();
   const { start, stop } = useProgressBar();
   const [loaded, setLoaded] = useState(false);
   const [items, setItems] = useState<null | Event[]>(null);
-  const [refetch, setRefetch] = useState<number>(0);
   const router = useRouter();
   const { user } = useAuth();
+  const theme = useTheme();
 
   useEffect(() => {
     if (loaded) {
@@ -37,7 +39,7 @@ const ProfilePage = (props: ProfilePageProps) => {
 
   useEffect(() => {
     fetchMyEvents();
-  }, [refetch]);
+  }, []);
 
   const fetchMyEvents = async () => {
     const { data } = await readAllRegistered();
@@ -57,29 +59,8 @@ const ProfilePage = (props: ProfilePageProps) => {
 
   return (
     <>
-      {/* <Card sx={{ minHeight: 150, width: '100%' }}>
-        <Grid container spacing={3} sx={{ padding: 6 }}>
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Événements enregistrés
-            </Typography>
-          </Grid>
-          {/* {items && items?.length !== 0 ? (
-            items.map((event) => (
-              <Grid item key={event.id} xs={12} sm={12} md={6} lg={4}>
-                <EventCard {...event} mutate={mutate} setRefetch={setRefetch} />
-              </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <NoEventsFound create={false} register />
-            </Grid>
-          )} 
-        </Grid>
-      </Card>  */}
-      <Grid container spacing={1} sx={{ padding: 1 }}>
-        <Grid item lg={9} sx={{ border: '1px solid red' }}></Grid>
-        <Grid item lg={3} sx={{ border: '1px solid black' }}>
+      <Grid container spacing={1} sx={{ padding: 1, position: 'relative' }}>
+        <Grid item lg={3} md={3} sm={12}>
           <Card
             sx={{
               paddingX: 3,
@@ -154,6 +135,39 @@ const ProfilePage = (props: ProfilePageProps) => {
                   </Button>
                 </Box>
               </Grid>
+            </Grid>
+          </Card>
+        </Grid>
+        <Grid item lg={9} md={9} sm={12}>
+          <Card sx={{ minHeight: 150, width: '100%' }}>
+            <Grid
+              container
+              spacing={3}
+              sx={{ padding: 2, [theme.breakpoints.down('md')]: { padding: 1 } }}
+            >
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 'bold',
+                    ml: 2,
+                    [theme.breakpoints.down('md')]: { textAlign: 'center', ml: 0 },
+                  }}
+                >
+                  Événements enregistrés
+                </Typography>
+              </Grid>
+              {items && items?.length !== 0 ? (
+                items.map((event) => (
+                  <Grid item key={event.id} xs={12} sm={12} md={6} lg={6}>
+                    <RegisteredEventCard event={event} fetchEvents={fetchMyEvents} />
+                  </Grid>
+                ))
+              ) : (
+                <Grid item xs={12}>
+                  <NoEventsFound create={false} register />
+                </Grid>
+              )}
             </Grid>
           </Card>
         </Grid>
