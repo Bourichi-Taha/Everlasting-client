@@ -9,11 +9,42 @@ import PageHeader from '@common/components/lib/partials/PageHeader';
 import { CRUD_ACTION } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
-// import OwnEvents from '@modules/events/components/partials/OwnEvents';
+import OwnEvents from '@modules/events/components/partials/OwnEvents';
+import useProgressBar from '@common/hooks/useProgressBar';
+import useEvents from '@modules/events/hooks/api/useEvents';
+import { useEffect, useState } from 'react';
+import { Event } from '@modules/events/defs/types';
 
 const EventsPage: NextPage = () => {
   const router = useRouter();
+  const { start, stop } = useProgressBar();
+  const { readAllOwn } = useEvents();
+  const [loaded, setLoaded] = useState(false);
+  const [events, setEvents] = useState<Event[]>([]);
 
+  useEffect(() => {
+    if (loaded) {
+      stop();
+    } else {
+      start();
+    }
+  }, [loaded]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    const res = await readAllOwn();
+    if (res.success) {
+      if (res.data && res.data.items) {
+        setEvents(res.data.items);
+      }
+    } else {
+      router.back();
+    }
+    setLoaded(true);
+  };
   return (
     <>
       <PageHeader
@@ -31,7 +62,7 @@ const EventsPage: NextPage = () => {
       <CustomBreadcrumbs
         links={[{ name: 'Dashboard', href: Routes.Common.Home }, { name: Labels.Events.Items }]}
       />
-      {/* <OwnEvents /> */}
+      <OwnEvents events={events} fetchEvents={fetchEvents} />
     </>
   );
 };

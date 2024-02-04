@@ -10,6 +10,7 @@ interface Utils {
   getAllStatesNamesOfCountry: (countryName: string) => string[];
   getAllCitiesNamesOfCountry: (countryName: string) => string[];
   isEventDateGreaterThanToday: (eventDate: Date | string) => boolean;
+  formatDateTime: (dateString: string, timeString: string) => string;
 }
 
 const useUtils = (): Utils => {
@@ -61,22 +62,29 @@ const useUtils = (): Utils => {
     return Country.getAllCountries().map((country) => country.name);
   };
   const getAllStatesNamesOfCountry = (countryName: string): string[] => {
-    const countryCode = Country.getAllCountries().filter(
-      (country) => country.name === countryName
-    )[0].isoCode;
-    const states = State.getStatesOfCountry(countryCode)?.map((country) => country.name);
-    if (states) {
-      return states;
+    const countries = Country.getAllCountries();
+    if (countries) {
+      const countryCode = countries.find((country) => country.name === countryName)?.isoCode;
+      if (countryCode) {
+        const states = State.getStatesOfCountry(countryCode)?.map((country) => country.name);
+        if (states) {
+          return states;
+        }
+      }
     }
     return [];
   };
   const getAllCitiesNamesOfCountry = (countryName: string): string[] => {
-    const countryCode = Country.getAllCountries().filter(
-      (country) => country.name === countryName
-    )[0].isoCode;
-    const cities = City.getCitiesOfCountry(countryCode)?.map((city) => city.name);
-    if (cities) {
-      return cities;
+    const countries = Country.getAllCountries();
+
+    if (countries) {
+      const countryCode = countries.find((country) => country.name === countryName)?.isoCode;
+      if (countryCode) {
+        const cities = City.getCitiesOfCountry(countryCode)?.map((city) => city.name);
+        if (cities) {
+          return cities;
+        }
+      }
     }
     return [];
   };
@@ -85,6 +93,22 @@ const useUtils = (): Utils => {
     const eventDateTime = dayjs(eventDate);
 
     return eventDateTime.isAfter(today.add(1, 'day'));
+  };
+
+  const formatDateTime = (dateString: string, timeString: string) => {
+    const dateObj = new Date(dateString + 'T' + timeString); // Concatenate date and time
+    const formattedDate = new Intl.DateTimeFormat('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+    }).format(dateObj);
+
+    const formattedTime = new Intl.DateTimeFormat('fr-FR', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false, // Use 24-hour format
+    }).format(dateObj);
+
+    return `${formattedDate} à ${formattedTime}`;
   };
 
   return {
@@ -96,6 +120,7 @@ const useUtils = (): Utils => {
     getAllCitiesNamesOfCountry,
     getAllStatesNamesOfCountry,
     isEventDateGreaterThanToday,
+    formatDateTime,
   };
 };
 
