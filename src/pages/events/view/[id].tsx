@@ -12,7 +12,7 @@ import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
 import useEvents from '@modules/events/hooks/api/useEvents';
 import { Event } from '@modules/events/defs/types';
-import EventDetails from '@modules/events/components/partials/EventDetails';
+import EventDetails from '@modules/events/components/pages/EventDetails';
 
 const EventsPage: NextPage = () => {
   const router = useRouter();

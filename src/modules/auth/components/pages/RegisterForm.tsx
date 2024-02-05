@@ -1,6 +1,6 @@
 import FormProvider, { RHFTextField } from '@common/components/lib/react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import useAuth, { LoginInput } from '@modules/auth/hooks/api/useAuth';
+import useAuth, { RegisterInput } from '@modules/auth/hooks/api/useAuth';
 import { LockOpen } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import Card from '@mui/material/Card';
@@ -11,19 +11,21 @@ import * as Yup from 'yup';
 import Link from '@mui/material/Link';
 import Routes from '@common/defs/routes';
 
-const LoginForm = () => {
-  const { login } = useAuth();
-  const LoginSchema = Yup.object().shape({
+const RegisterForm = () => {
+  const { register } = useAuth();
+  const RegisterSchema = Yup.object().shape({
     email: Yup.string()
       .email("Le format de l'email est incorrect")
       .required('Le champ est obligatoire'),
     password: Yup.string().required('Le champ est obligatoire'),
+    username: Yup.string().required('Le champ est obligatoire'),
   });
-  const methods = useForm<LoginInput>({
-    resolver: yupResolver(LoginSchema),
+  const methods = useForm<RegisterInput>({
+    resolver: yupResolver(RegisterSchema),
     defaultValues: {
       email: '',
       password: '',
+      username: '',
     },
   });
 
@@ -31,11 +33,12 @@ const LoginForm = () => {
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
-  const onSubmit = async (data: LoginInput) => {
-    await login(
+  const onSubmit = async (data: RegisterInput) => {
+    await register(
       {
         email: data.email,
         password: data.password,
+        username: data.username,
       },
       { displayProgress: true, displaySuccess: true }
     );
@@ -52,13 +55,16 @@ const LoginForm = () => {
           fontWeight: 'bold',
         }}
       >
-        Connexion
+        Registration
       </Typography>
       <Card sx={{ maxWidth: '450px', margin: 'auto' }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={4} sx={{ padding: 5 }}>
             <Grid item xs={12}>
               <RHFTextField name="email" label="Email" />
+            </Grid>
+            <Grid item xs={12}>
+              <RHFTextField name="username" label="Username" />
             </Grid>
             <Grid item xs={12}>
               <RHFTextField name="password" label="Mot de passe" type="password" />
@@ -77,14 +83,8 @@ const LoginForm = () => {
             </Grid>
             <Grid item xs={12} sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                Vous avez pas un compte ? {` `}
-                <Link href={Routes.Auth.Register}>Cliquez ici</Link>
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                Vous avez oublié votre mot de passe ? {` `}
-                <Link href={Routes.Auth.RequestPasswordReset}>Cliquez ici</Link>
+                Vous avez déja un compte ? {` `}
+                <Link href={Routes.Auth.Login}>Cliquez ici</Link>
               </Typography>
             </Grid>
           </Grid>
@@ -94,4 +94,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;

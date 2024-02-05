@@ -7,7 +7,7 @@ import CustomBreadcrumbs from '@common/components/lib/navigation/CustomBreadCrum
 import { CRUD_ACTION } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
-import CreateEventWithUploadForm from '@modules/events/components/partials/CreateEventWithUploadForm';
+import CreateEventWithUploadForm from '@modules/events/components/pages/CreateEventWithUploadForm';
 
 const EventsPage: NextPage = () => {
   return (

@@ -1,4 +1,5 @@
 import ApiRoutes from '@common/defs/apiRoutes';
+import { Id } from '@common/defs/types';
 import useApi, { ApiOptions, ApiResponse, FetchApiOptions } from '@common/hooks/useApi';
 import { User } from '@modules/users/defs/types';
 import { useState } from 'react';
@@ -13,6 +14,9 @@ export interface LoginInput {
 export interface RegisterInput {
   email: string;
   password: string;
+  username: string;
+  imageId?: Id;
+  avatar?: File;
 }
 
 export interface RequestPasswordResetInput {

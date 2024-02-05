@@ -7,7 +7,7 @@ import CustomBreadcrumbs from '@common/components/lib/navigation/CustomBreadCrum
 import { CRUD_ACTION, Id } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
-import UpdateEventWithUploadForm from '@modules/events/components/partials/UpdateEventWithUploadForm';
+import UpdateEventWithUploadForm from '@modules/events/components/pages/UpdateEventWithUploadForm';
 import { useRouter } from 'next/router';
 import useProgressBar from '@common/hooks/useProgressBar';
 import useEvents from '@modules/events/hooks/api/useEvents';
