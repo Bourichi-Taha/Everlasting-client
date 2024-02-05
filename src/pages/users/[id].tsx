@@ -12,7 +12,7 @@ import useUsers from '@modules/users/hooks/api/useUsers';
 import { CRUD_ACTION, Id } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
-import UpdateUserForm from '@modules/users/components/partials/UpdateUserForm';
+import UpdateUserForm from '@modules/users/components/pages/UpdateUserForm';
 
 const UsersPage: NextPage = () => {
   const router = useRouter();

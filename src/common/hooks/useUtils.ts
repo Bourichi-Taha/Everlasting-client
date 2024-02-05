@@ -48,17 +48,16 @@ const useUtils = (): Utils => {
     const endTimeMinutes =
       parseInt(onlyHoursAndMinutesEnd.split(':')[0]) * 60 +
       parseInt(onlyHoursAndMinutesEnd.split(':')[1]);
-
     return endTimeMinutes > startTimeMinutes;
   };
   const transformToCustomFormat = (timeString: string): string => {
-    const [hours, minutes] = timeString.split(':');
+    const [hours, minutes, seconds] = timeString.split(':');
 
     const customFormat = dayjs()
       .set('hour', parseInt(hours))
       .set('minute', parseInt(minutes))
-      .set('second', 2)
-      .format('ddd, DD MMM YYYY HH:mm:ss [GMT]');
+      .set('second', parseInt(seconds))
+      .format('ddd, DD MMM YYYY HH:mm:ss');
 
     return customFormat;
   };

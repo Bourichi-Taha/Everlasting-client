@@ -10,6 +10,7 @@ import Link from '@mui/material/Link';
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 import Routes from '@common/defs/routes';
+import { useRouter } from 'next/router';
 
 interface ResetPasswordProps {
   token: string;
@@ -17,6 +18,7 @@ interface ResetPasswordProps {
 type ResetPasswordInputForm = Omit<ResetPasswordInput, 'token'>;
 const ResetPassword = (props: ResetPasswordProps) => {
   const { resetPassword } = useAuth();
+  const router = useRouter();
   const ResetPasswordSchema = Yup.object().shape({
     email: Yup.string()
       .email("Le format de l'email est incorrect")
@@ -40,7 +42,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     formState: { isSubmitting },
   } = methods;
   const onSubmit = async (data: ResetPasswordInputForm) => {
-    await resetPassword(
+    const res = await resetPassword(
       {
         email: data.email,
         password: data.password,
@@ -49,6 +51,9 @@ const ResetPassword = (props: ResetPasswordProps) => {
       },
       { displayProgress: true, displaySuccess: true }
     );
+    if (res.success) {
+      router.push(Routes.Auth.Login);
+    }
   };
   return (
     <>

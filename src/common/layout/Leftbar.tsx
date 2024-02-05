@@ -19,7 +19,7 @@ import AccountBoxRoundedIcon from '@mui/icons-material/AccountBoxRounded';
 import { useRouter } from 'next/router';
 import Typography from '@mui/material/Typography';
 import useAuth from '@modules/auth/hooks/api/useAuth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Logo from '@common/assets/svgs/Logo';
 import Routes from '@common/defs/routes';
 import ListSubheader from '@mui/material/ListSubheader';
@@ -120,14 +120,44 @@ const Leftbar = (props: LeftbarProps) => {
     }
   };
   const isMobile = !useMediaQuery(theme.breakpoints.up('sm'));
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const drawerOpnerRef = useRef<HTMLDivElement>(null);
   const toggleLeftbar = () => {
     const newOpen = !open;
     props.onToggle(newOpen);
   };
+  const openLeftbar = () => {
+    const newOpen = true;
+    props.onToggle(newOpen);
+  };
+  const closeLeftbar = () => {
+    const newOpen = false;
+    props.onToggle(newOpen);
+  };
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (drawerRef.current && !drawerRef.current.contains(event.target as Node) && isMobile) {
+        // Click outside the drawer, close it
+        return closeLeftbar();
+      }
+    };
+
+    // Attach the event listener when the drawer is open
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    // Remove the event listener when the component unmounts or the drawer is closed
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [open]);
+  useEffect(() => {
+    closeLeftbar();
+  }, [router.pathname]);
   return (
     <>
       <Drawer
         anchor="left"
+        id="leftbar-drawer"
         open={open}
         variant={isMobile ? 'temporary' : 'persistent'}
         PaperProps={{
@@ -135,136 +165,158 @@ const Leftbar = (props: LeftbarProps) => {
             width: LEFTBAR_WIDTH,
             bgcolor: 'background.default',
             borderRightStyle: 'dashed',
-            marginTop: 0.5,
+            // marginTop: 0.5,
             px: 2.5,
           },
         }}
         sx={{
           display: open ? 'block' : 'none',
+          position: isMobile ? 'absolute' : 'unset',
+          left: 0,
+          top: 0,
         }}
       >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{
-            py: 3,
-            marginBottom: 2,
-            borderBottomWidth: 1,
-            borderBottomColor: 'grey.300',
-          }}
-        >
-          <Stack direction="row" alignItems="center">
-            <Logo id="leftbar-logo" sx={{ marginRight: 2 }} />
-            <Typography variant="h6" sx={{ color: 'primary.main' }}>
-              {process.env.NEXT_PUBLIC_APP_TITLE}
-            </Typography>
-          </Stack>
+        <Box ref={drawerRef}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{
+              py: 3,
+              marginBottom: 2,
+              borderBottomWidth: 1,
+              borderBottomColor: 'grey.300',
+            }}
+          >
+            <Stack direction="row" alignItems="center">
+              <Logo id="leftbar-logo" sx={{ marginRight: 2 }} />
+              <Typography variant="h6" sx={{ color: 'primary.main' }}>
+                {process.env.NEXT_PUBLIC_APP_TITLE}
+              </Typography>
+            </Stack>
 
-          <IconButton onClick={toggleLeftbar}>
-            <Close
+            <IconButton onClick={toggleLeftbar}>
+              <Close
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'color 0.2s',
+                  color: 'grey.700',
+                }}
+                fontSize="small"
+              />
+            </IconButton>
+          </Stack>
+          {user && (
+            <Box
               sx={{
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                color: 'grey.700',
-              }}
-              fontSize="small"
-            />
-          </IconButton>
-        </Stack>
-        {user && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: theme.spacing(2, 2.5),
-              borderRadius: theme.shape.borderRadius * 1.5 + 'px',
-              backgroundColor: 'action.hover',
-              mb: 5,
-            }}
-          >
-            <AccountCircle fontSize="large" color="action" sx={{ mr: 1 }} />
-            <Box>
-              <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {user.email}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {user.rolesNames[0]}
-              </Typography>
-            </Box>
-          </Box>
-        )}
-        <Box>
-          <List disablePadding>
-            {navEntries.map((entry, groupIndex) => (
-              <Box key={groupIndex}>
-                {entry.text && <StyledSubheader disableSticky>{entry.text}</StyledSubheader>}
-                {entry.items.map((item, itemIndex) => {
-                  let link = item.link;
-                  if (link.length > 1) {
-                    link = item.link.endsWith('/') ? item.link.slice(0, -1) : item.link;
-                  }
-                  return (
-                    <StyledLinkNavItem
-                      key={itemIndex}
-                      passHref
-                      href={link}
-                      className={`${router.pathname === link ? 'active' : ''}`}
-                    >
-                      <StyledListItemButton disableGutters>
-                        <StyledListItemIcon>{item.icon}</StyledListItemIcon>
-                        <ListItemText disableTypography primary={item.text} />
-                        {item.suffix && (
-                          <Tooltip title={item.suffix.tooltip}>
-                            <IconButton
-                              size="small"
-                              // on click, stoppropagation to avoid triggering the parent link
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                if (item.suffix) {
-                                  router.push(item.suffix.link);
-                                }
-                              }}
-                            >
-                              {item.suffix.icon}
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </StyledListItemButton>
-                    </StyledLinkNavItem>
-                  );
-                })}
-              </Box>
-            ))}
-          </List>
-        </Box>
-        {user && (
-          <IconButton
-            sx={{
-              color: theme.palette.text.secondary,
-              padding: theme.spacing(2, 2.5),
-              borderRadius: theme.shape.borderRadius * 1.5 + 'px',
-              marginTop: 10,
-              textAlign: 'center',
-              '&:hover': {
+                display: 'flex',
+                alignItems: 'center',
+                padding: theme.spacing(2, 2.5),
+                borderRadius: theme.shape.borderRadius * 1.5 + 'px',
                 backgroundColor: 'action.hover',
-              },
-            }}
-            onClick={() => {
-              router.push(Routes.Common.Home);
-              logout();
-            }}
-          >
-            <ExitToAppOutlined sx={{ marginRight: 1 }} fontSize="small" />
-            <Typography variant="body2" sx={{ cursor: 'pointer' }}>
-              Déconnexion
-            </Typography>
-          </IconButton>
-        )}
+                mb: 5,
+              }}
+            >
+              {user.avatar ? (
+                <Box
+                  component="img"
+                  sx={{
+                    height: 40,
+                    width: 40,
+                    objectFit: 'cover',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    mr: 1,
+                  }}
+                  alt="avatar."
+                  src={process.env.NEXT_PUBLIC_API_URL + user.avatar.path}
+                />
+              ) : (
+                <AccountCircle fontSize="large" color="action" sx={{ mr: 1 }} />
+              )}
+              <Box>
+                <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
+                  {user.email}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {user.rolesNames[0]}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+          <Box>
+            <List disablePadding>
+              {navEntries.map((entry, groupIndex) => (
+                <Box key={groupIndex}>
+                  {entry.text && <StyledSubheader disableSticky>{entry.text}</StyledSubheader>}
+                  {entry.items.map((item, itemIndex) => {
+                    let link = item.link;
+                    if (link.length > 1) {
+                      link = item.link.endsWith('/') ? item.link.slice(0, -1) : item.link;
+                    }
+                    return (
+                      <StyledLinkNavItem
+                        key={itemIndex}
+                        passHref
+                        href={link}
+                        className={`${router.pathname === link ? 'active' : ''}`}
+                      >
+                        <StyledListItemButton disableGutters>
+                          <StyledListItemIcon>{item.icon}</StyledListItemIcon>
+                          <ListItemText disableTypography primary={item.text} />
+                          {item.suffix && (
+                            <Tooltip title={item.suffix.tooltip}>
+                              <IconButton
+                                size="small"
+                                // on click, stoppropagation to avoid triggering the parent link
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  if (item.suffix) {
+                                    router.push(item.suffix.link);
+                                  }
+                                }}
+                              >
+                                {item.suffix.icon}
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </StyledListItemButton>
+                      </StyledLinkNavItem>
+                    );
+                  })}
+                </Box>
+              ))}
+            </List>
+          </Box>
+          {user && (
+            <IconButton
+              sx={{
+                color: theme.palette.text.secondary,
+                padding: theme.spacing(2, 2.5),
+                borderRadius: theme.shape.borderRadius * 1.5 + 'px',
+                marginTop: 10,
+                textAlign: 'center',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
+              }}
+              onClick={async () => {
+                await logout();
+                router.push(Routes.Auth.Login);
+              }}
+            >
+              <ExitToAppOutlined sx={{ marginRight: 1 }} fontSize="small" />
+              <Typography variant="body2" sx={{ cursor: 'pointer' }}>
+                Déconnexion
+              </Typography>
+            </IconButton>
+          )}
+        </Box>
       </Drawer>
       {!open && (
         <Box
+          ref={drawerOpnerRef}
           sx={{
             position: 'absolute',
             display: 'flex',
@@ -276,7 +328,7 @@ const Leftbar = (props: LeftbarProps) => {
           }}
         >
           <IconButton
-            onClick={toggleLeftbar}
+            onClick={openLeftbar}
             sx={{
               display: open ? 'none' : 'block',
               height: 40,

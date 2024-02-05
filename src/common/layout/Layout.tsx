@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Footer from './Footer';
 import Leftbar, { LEFTBAR_WIDTH } from './Leftbar';
-import Topbar from './Topbar';
+// import Topbar from './Topbar';
 import Box from '@mui/material/Box';
-import { Container, useTheme } from '@mui/material';
+import { Container, useMediaQuery, useTheme } from '@mui/material';
 import Stack from '@mui/material/Stack';
 
 interface ILayoutProps {
@@ -15,6 +15,8 @@ const Layout = (props: ILayoutProps) => {
   const { children } = props;
   const theme = useTheme();
   const [openLeftbar, setOpenLeftbar] = useState(false);
+  const isMobile = !useMediaQuery(theme.breakpoints.up('sm'));
+
   return (
     <div>
       <Head>
@@ -27,17 +29,27 @@ const Layout = (props: ILayoutProps) => {
         }}
       >
         <Box sx={{ minHeight: '100vh', width: '100vw' }}>
-          <Stack direction="column" sx={{ height: '100%' }}>
+          <Stack direction="column" sx={{ height: '100%', position: 'relative' }}>
             <Leftbar open={openLeftbar} onToggle={(open) => setOpenLeftbar(open)} />
             {/* <Topbar /> */}
             <Box
-              sx={{
-                display: 'flex',
-                flex: 1,
-                justifyContent: 'center',
-                marginLeft: openLeftbar ? LEFTBAR_WIDTH + 'px' : 0,
-                width: openLeftbar ? `calc(100% - ${LEFTBAR_WIDTH}px)` : '100%',
-              }}
+              sx={
+                !isMobile
+                  ? {
+                      display: 'flex',
+                      flex: 1,
+                      justifyContent: 'center',
+                      marginLeft: openLeftbar ? LEFTBAR_WIDTH + 'px' : 0,
+                      width: openLeftbar ? `calc(100% - ${LEFTBAR_WIDTH}px)` : '100%',
+                    }
+                  : {
+                      display: 'flex',
+                      flex: 1,
+                      justifyContent: 'center',
+                      marginLeft: 0,
+                      width: '100%',
+                    }
+              }
             >
               <Container
                 sx={{
@@ -55,14 +67,25 @@ const Layout = (props: ILayoutProps) => {
               </Container>
             </Box>
             <Box
-              sx={{
-                marginLeft: openLeftbar ? LEFTBAR_WIDTH + 'px' : 0,
-                maxWidth: openLeftbar ? `calc(100% - ${LEFTBAR_WIDTH}px)` : '100%',
-                transition: theme.transitions.create(['all'], {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.leavingScreen,
-                }),
-              }}
+              sx={
+                !isMobile
+                  ? {
+                      marginLeft: openLeftbar ? LEFTBAR_WIDTH + 'px' : 0,
+                      maxWidth: openLeftbar ? `calc(100% - ${LEFTBAR_WIDTH}px)` : '100%',
+                      transition: theme.transitions.create(['all'], {
+                        easing: theme.transitions.easing.sharp,
+                        duration: theme.transitions.duration.leavingScreen,
+                      }),
+                    }
+                  : {
+                      marginLeft: 0,
+                      width: '100%',
+                      transition: theme.transitions.create(['all'], {
+                        easing: theme.transitions.easing.sharp,
+                        duration: theme.transitions.duration.leavingScreen,
+                      }),
+                    }
+              }
             >
               <Footer />
             </Box>

@@ -7,7 +7,7 @@ import CustomBreadcrumbs from '@common/components/lib/navigation/CustomBreadCrum
 import { CRUD_ACTION } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import useAuth from '@modules/auth/hooks/api/useAuth';
-import ProfilePage from '@modules/users/components/partials/ProfilePage';
+import ProfilePage from '@modules/users/components/pages/ProfilePage';
 
 const UserPage: NextPage = () => {
   const { user } = useAuth();

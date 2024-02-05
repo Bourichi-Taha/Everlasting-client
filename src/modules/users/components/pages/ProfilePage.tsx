@@ -60,7 +60,7 @@ const ProfilePage = (props: ProfilePageProps) => {
   return (
     <>
       <Grid container spacing={1} sx={{ padding: 1, position: 'relative' }}>
-        <Grid item lg={3} md={3} sm={12}>
+        <Grid item lg={3} md={3} sm={12} xs={12}>
           <Card
             sx={{
               paddingX: 3,
@@ -88,19 +88,23 @@ const ProfilePage = (props: ProfilePageProps) => {
                 border: `4px solid #f2f2f2`,
               }}
             >
-              <Box
-                component="img"
-                sx={{
-                  height: 80,
-                  objectFit: 'cover',
-                }}
-                alt="avatar."
-                src={
-                  item.avatar
-                    ? process.env.NEXT_PUBLIC_API_URL + item.avatar.path
-                    : '/images/illustrations/Image_not_available_icon.png'
-                }
-              />
+              {item.avatar ? (
+                <Box
+                  component="img"
+                  sx={{
+                    height: 80,
+                    objectFit: 'cover',
+                  }}
+                  alt="avatar."
+                  src={process.env.NEXT_PUBLIC_API_URL + item.avatar.path}
+                />
+              ) : (
+                <AccountCircleIcon
+                  fontSize="large"
+                  color="action"
+                  sx={{ height: '100%', width: '100%' }}
+                />
+              )}
             </Box>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -138,7 +142,7 @@ const ProfilePage = (props: ProfilePageProps) => {
             </Grid>
           </Card>
         </Grid>
-        <Grid item lg={9} md={9} sm={12}>
+        <Grid item lg={9} md={9} sm={12} xs={12}>
           <Card sx={{ minHeight: 150, width: '100%' }}>
             <Grid
               container

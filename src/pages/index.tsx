@@ -59,15 +59,17 @@ const Index: NextPage = () => {
   };
   const filteredEvents: Event[] = useMemo(() => {
     if (events && events.length !== 0) {
-      const filtered = events.filter((event) => {
-        return (
-          (filterCriteria.categories.length === 0 ||
-            filterCriteria.categories.includes(event.categoryName)) &&
-          (!filterCriteria.status || filterByStatus(event.date, filterCriteria.status)) &&
-          (filterCriteria.countries.length === 0 ||
-            filterCriteria.countries.includes(event.location.country))
-        );
-      });
+      const filtered = events
+        .filter((item) => item.statusName !== STATUS.CANCELED)
+        .filter((event) => {
+          return (
+            (filterCriteria.categories.length === 0 ||
+              filterCriteria.categories.includes(event.categoryName)) &&
+            (!filterCriteria.status || filterByStatus(event.date, filterCriteria.status)) &&
+            (filterCriteria.countries.length === 0 ||
+              filterCriteria.countries.includes(event.location.country))
+          );
+        });
       filtered.sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
