@@ -35,6 +35,14 @@ export default withAuth(
         entity: Namespaces.Users,
         action: CRUD_ACTION.READ,
       },
+      {
+        entity: Namespaces.Events,
+        action: CRUD_ACTION.CANCEL,
+      },
+      {
+        entity: Namespaces.Events,
+        action: CRUD_ACTION.READ,
+      },
     ],
     redirectUrl: Routes.Permissions.Forbidden,
   }),

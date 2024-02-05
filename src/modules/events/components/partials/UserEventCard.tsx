@@ -51,7 +51,6 @@ const UserEventCard: React.FC<EventCardProps> = (props: EventCardProps) => {
       }
     }
   };
-  console.log(router.pathname);
 
   return (
     <Card

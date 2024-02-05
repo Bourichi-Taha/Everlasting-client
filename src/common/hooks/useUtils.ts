@@ -1,3 +1,4 @@
+import { STATUS } from '@modules/events/defs/types';
 import { City, Country, State } from 'country-state-city';
 import dayjs, { Dayjs } from 'dayjs';
 
@@ -7,11 +8,13 @@ interface Utils {
   isEndTimeLaterThanStartTime: (startTime: string, endTime: string) => boolean;
   transformToCustomFormat: (timeString: string) => string;
   getAllCountryNames: () => string[];
+  getAllCitiesNames: () => string[];
   getAllStatesNamesOfCountry: (countryName: string) => string[];
   getAllCitiesNamesOfCountry: (countryName: string) => string[];
   isEventDateGreaterThanToday: (eventDate: Date | string) => boolean;
   formatDateTime: (dateString: string, timeString: string) => string;
   formatReadableDuration: (duration: string) => string;
+  filterByStatus: (dateString: string, status: string) => boolean;
 }
 
 const useUtils = (): Utils => {
@@ -32,7 +35,8 @@ const useUtils = (): Utils => {
     return date;
   };
   const formatHours = (time: string): string => {
-    return time.split(' ')[4].split(':').slice(0, 2).join(':');
+    const dateTime = dayjs(time).add(1, 'hour').toISOString().split('T')[1].split('.')[0];
+    return dateTime;
   };
   const isEndTimeLaterThanStartTime = (startTime: string, endTime: string): boolean => {
     // validate time as endTime latter than startTime (true if valid false if invalid)
@@ -61,6 +65,15 @@ const useUtils = (): Utils => {
 
   const getAllCountryNames = (): string[] => {
     return Country.getAllCountries().map((country) => country.name);
+  };
+  const getAllCitiesNames = (): string[] => {
+    const cities = City.getAllCities().map((city) => city.name);
+    // Filter out duplicates
+    const uniqueCities = cities.filter((value, index, self) => {
+      return self.indexOf(value) === index;
+    });
+
+    return uniqueCities;
   };
   const getAllStatesNamesOfCountry = (countryName: string): string[] => {
     const countries = Country.getAllCountries();
@@ -97,7 +110,7 @@ const useUtils = (): Utils => {
   };
 
   const formatDateTime = (dateString: string, timeString: string) => {
-    const dateObj = new Date(dateString + 'T' + timeString); // Concatenate date and time
+    const dateObj = new Date(dateString.split('T')[0] + 'T' + timeString); // Concatenate date and time
     const formattedDate = new Intl.DateTimeFormat('fr-FR', {
       day: 'numeric',
       month: 'long',
@@ -127,6 +140,23 @@ const useUtils = (): Utils => {
 
     return readableDuration.trim();
   };
+  const filterByStatus = (dateString: string, status: string): boolean => {
+    const currentDate = new Date();
+    const date = new Date(dateString);
+    if (status === STATUS.TODAY) {
+      // Check if the date is today
+      return date.toDateString() === currentDate.toDateString();
+    }
+    if (status === STATUS.UPCOMING) {
+      // Check if the date is in the future
+      return date.getTime() > currentDate.getTime();
+    }
+    if (status === STATUS.PAST) {
+      return date.getTime() < currentDate.getTime();
+    }
+    // Return false for invalid condition
+    return false;
+  };
 
   return {
     formatDate,
@@ -139,6 +169,8 @@ const useUtils = (): Utils => {
     isEventDateGreaterThanToday,
     formatDateTime,
     formatReadableDuration,
+    getAllCitiesNames,
+    filterByStatus,
   };
 };
 

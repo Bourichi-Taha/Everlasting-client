@@ -38,6 +38,7 @@ export enum CRUD_ACTION {
   READ = 'read',
   UPDATE = 'update',
   DELETE = 'delete',
+  CANCEL = 'cancel',
 }
 
 export interface CrudLabels {
