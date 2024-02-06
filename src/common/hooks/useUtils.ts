@@ -153,8 +153,8 @@ const useUtils = (): Utils => {
     if (status === STATUS.PAST) {
       return date.getTime() < currentDate.getTime();
     }
-    // Return false for invalid condition
-    return false;
+    // Return true for all value condition
+    return true;
   };
 
   return {

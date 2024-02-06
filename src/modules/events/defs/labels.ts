@@ -9,7 +9,7 @@ const Labels: EventsLabels = {
   ReadAll: 'Liste des événements',
   Items: 'Événements',
   EditOne: "Éditer l'événement",
-  ViewOne: "Voir l'événement",
+  ViewOne: "Détails d'événement",
 };
 export const EventsInputLabels = {
   category: 'Catégorie',

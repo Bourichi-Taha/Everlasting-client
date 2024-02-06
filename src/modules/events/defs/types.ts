@@ -1,4 +1,4 @@
-import { CrudObject } from '@common/defs/types';
+import { CrudObject, Id } from '@common/defs/types';
 import { Location } from '@modules/locations/defs/types';
 import { Upload } from '@modules/uploads/defs/types';
 import { User } from '@modules/users/defs/types';
@@ -9,14 +9,13 @@ export interface Event extends CrudObject {
   description: string;
   maxNumParticipants: number; // maximum number of registered users
   date: string;
-  imageId?: number | undefined;
-  image?: Upload | undefined;
+  imageId?: Id;
+  image?: Upload;
   owner: User;
-  categoryId: number;
-  statusId: number;
+  categoryId: Id;
   categoryName: string;
   registeredNumber: number; // number of users registered in an event
-  registeredIds: number[]; // array of ids of registered users
+  registeredIds: Id[]; // array of ids of registered users
   statusName: STATUS;
   duration: string;
   startTime: string;
@@ -24,8 +23,8 @@ export interface Event extends CrudObject {
 }
 
 export enum STATUS {
-  UPCOMING = 'Upcoming',
-  PAST = 'Past',
-  CANCELED = 'Canceled',
-  TODAY = 'Today',
+  UPCOMING = 'upcoming',
+  PAST = 'past',
+  CANCELED = 'canceled',
+  TODAY = 'today',
 }

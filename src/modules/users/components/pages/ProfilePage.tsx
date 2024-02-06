@@ -1,12 +1,19 @@
 import Routes from '@common/defs/routes';
 import useProgressBar from '@common/hooks/useProgressBar';
-import useAuth from '@modules/auth/hooks/api/useAuth';
-// import EventCard from '@modules/events/components/partials/EventCard';
-// import NoEventsFound from '@modules/events/components/partials/NoEventsFound';
 import { Event } from '@modules/events/defs/types';
 import useEvents from '@modules/events/hooks/api/useEvents';
 import { User } from '@modules/users/defs/types';
-import { Box, Button, Card, Divider, Grid, Tooltip, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Divider,
+  Grid,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -26,7 +33,6 @@ const ProfilePage = (props: ProfilePageProps) => {
   const [loaded, setLoaded] = useState(false);
   const [items, setItems] = useState<null | Event[]>(null);
   const router = useRouter();
-  const { user } = useAuth();
   const theme = useTheme();
 
   useEffect(() => {
@@ -43,20 +49,45 @@ const ProfilePage = (props: ProfilePageProps) => {
 
   const fetchMyEvents = async () => {
     const { data } = await readAllRegistered();
-    if (data) {
-      if (data.items) {
-        setItems(data.items);
-      }
+    if (data && data.items) {
+      setItems(data.items);
     }
     setLoaded(true);
   };
 
   const startEdit = () => {
-    if (user?.id) {
+    if (item?.id) {
       router.push(Routes.Users.UpdateProfile);
     }
   };
-
+  const renderEvents = () => {
+    if (!loaded) {
+      return (
+        <Grid
+          item
+          xs={12}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="400px"
+        >
+          <CircularProgress color="primary" />
+        </Grid>
+      );
+    }
+    if (items && items?.length !== 0) {
+      return items.map((event) => (
+        <Grid item key={event.id} xs={12} sm={12} md={6} lg={6}>
+          <RegisteredEventCard event={event} fetchEvents={fetchMyEvents} />
+        </Grid>
+      ));
+    }
+    return (
+      <Grid item xs={12}>
+        <NoEventsFound create={false} register />
+      </Grid>
+    );
+  };
   return (
     <>
       <Grid container spacing={1} sx={{ padding: 1, position: 'relative' }}>
@@ -161,17 +192,7 @@ const ProfilePage = (props: ProfilePageProps) => {
                   Événements enregistrés
                 </Typography>
               </Grid>
-              {items && items?.length !== 0 ? (
-                items.map((event) => (
-                  <Grid item key={event.id} xs={12} sm={12} md={6} lg={6}>
-                    <RegisteredEventCard event={event} fetchEvents={fetchMyEvents} />
-                  </Grid>
-                ))
-              ) : (
-                <Grid item xs={12}>
-                  <NoEventsFound create={false} register />
-                </Grid>
-              )}
+              {renderEvents()}
             </Grid>
           </Card>
         </Grid>

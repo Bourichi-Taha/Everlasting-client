@@ -33,7 +33,15 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
         return true; // No file provided, so no validation needed
       }
       const file = value as File;
-      const acceptedFormats = ['image/jpeg', 'image/png', 'image/jpg']; // Add more formats as needed
+      const acceptedFormats = [
+        'image/jpg',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/bmp',
+        'image/svg',
+        'image/webp',
+      ]; // Add more formats as needed
       return acceptedFormats.includes(file.type);
     }),
   });

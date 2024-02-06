@@ -72,7 +72,15 @@ const UpdateEventWithUploadForm = (props: UpdateEventFormProps) => {
         return true; // No file provided, so no validation needed
       }
       const file = value as File;
-      const acceptedFormats = ['image/jpeg', 'image/png', 'image/jpg']; // Add more formats as needed
+      const acceptedFormats = [
+        'image/jpg',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/bmp',
+        'image/svg',
+        'image/webp',
+      ]; // Add more formats as needed
       return acceptedFormats.includes(file.type);
     }),
     startTime: Yup.string().required('Le champ est obligatoire'),
@@ -285,8 +293,8 @@ const UpdateEventWithUploadForm = (props: UpdateEventFormProps) => {
               <Tooltip
                 title={
                   isEventDateGreaterThanToday(event.date)
-                    ? ''
-                    : 'Vous pouvez uniquement mettre à jour les événements à venir.'
+                    ? 'Mettre à jour les données'
+                    : "Vous ne pouvez pas mettre à jour les événements passés ou d'aujourd'hui."
                 }
               >
                 <Box>

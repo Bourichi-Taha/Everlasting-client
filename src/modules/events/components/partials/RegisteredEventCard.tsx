@@ -85,7 +85,6 @@ const RegisteredEventCard: React.FC<EventCardProps> = (props: EventCardProps) =>
           <Tooltip title={event.name}>
             <Typography
               variant="h5"
-              component="div"
               sx={{
                 fontWeight: 'bold',
                 textTransform: 'capitalize',

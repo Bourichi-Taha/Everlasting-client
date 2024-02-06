@@ -26,6 +26,7 @@ import { Event, STATUS } from '@modules/events/defs/types';
 import useUtils from '@common/hooks/useUtils';
 import DashEvents from '@modules/events/components/partials/DashEvents';
 import useEvents from '@modules/events/hooks/api/useEvents';
+import { STATUS_OPTIONS } from '@modules/events/defs/options';
 
 interface FilterCriteria {
   categories: string[];
@@ -42,7 +43,7 @@ const Index: NextPage = () => {
   const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>({
     categories: [],
     sortOption: 'asc',
-    status: STATUS.UPCOMING,
+    status: 'all',
     countries: [],
   });
   const handleFilterChange = (field: string, value: string | string[]) => {
@@ -60,17 +61,18 @@ const Index: NextPage = () => {
   const filteredEvents: Event[] = useMemo(() => {
     if (events && events.length !== 0) {
       const filtered = events
-        .filter((item) => item.statusName !== STATUS.CANCELED)
+        .filter((item) => ![STATUS.CANCELED, STATUS.PAST].includes(item.statusName)) // removing canceled and past events
         .filter((event) => {
           return (
             (filterCriteria.categories.length === 0 ||
-              filterCriteria.categories.includes(event.categoryName)) &&
+              filterCriteria.categories.includes(event.categoryName)) && // checking if filter criteria has the event category in it categories props
             (!filterCriteria.status || filterByStatus(event.date, filterCriteria.status)) &&
             (filterCriteria.countries.length === 0 ||
-              filterCriteria.countries.includes(event.location.country))
+              filterCriteria.countries.includes(event.location.country)) // checking if filter criteria has the event country in it countries props
           );
         });
       filtered.sort((a, b) => {
+        // performing basic sort by event date after filtering
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
 
@@ -106,7 +108,7 @@ const Index: NextPage = () => {
       />
       {filteredEvents && <DashEvents events={filteredEvents} mutate={reFetchEvents} />}
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Filtrage et Triage</DialogTitle>
+        <DialogTitle>Filtrer et Trier</DialogTitle>
         <DialogContent>
           <Divider sx={{ mt: 2 }} />
           <Grid container spacing={3} sx={{ mt: 1 }}>
@@ -135,8 +137,17 @@ const Index: NextPage = () => {
                   label="Status"
                   placeholder="Status"
                 >
-                  <MenuItem value={STATUS.TODAY}>{STATUS.TODAY}</MenuItem>
-                  <MenuItem value={STATUS.UPCOMING}>{STATUS.UPCOMING}</MenuItem>
+                  <MenuItem value="all">Tous</MenuItem>
+                  {STATUS_OPTIONS.map((opt, key) => {
+                    if ([STATUS.TODAY, STATUS.UPCOMING].includes(opt.value)) {
+                      return (
+                        <MenuItem key={key} value={opt.value}>
+                          {opt.label}
+                        </MenuItem>
+                      );
+                    }
+                    return null;
+                  })}
                 </Select>
               </FormControl>
             </Grid>
@@ -155,14 +166,14 @@ const Index: NextPage = () => {
             </Grid>
             <Grid item md={6} sm={12} xs={12}>
               <FormControl fullWidth>
-                <InputLabel id="select-label">Triage</InputLabel>
+                <InputLabel id="select-label">L'ordre de tri</InputLabel>
                 <Select
                   labelId="select-label"
                   fullWidth
                   variant="outlined"
                   onChange={(e) => handleFilterChange('sortOption', e.target.value)}
                   value={filterCriteria.sortOption}
-                  label="Triage"
+                  label="L'ordre de tri"
                   placeholder="ASC/DESC"
                 >
                   <MenuItem value="asc">ASC</MenuItem>
@@ -179,7 +190,7 @@ const Index: NextPage = () => {
               setFilterCriteria({
                 categories: [],
                 sortOption: 'asc',
-                status: STATUS.UPCOMING,
+                status: 'all',
                 countries: [],
               });
             }}

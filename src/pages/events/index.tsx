@@ -62,7 +62,7 @@ const EventsPage: NextPage = () => {
       <CustomBreadcrumbs
         links={[{ name: 'Dashboard', href: Routes.Common.Home }, { name: Labels.Events.Items }]}
       />
-      <OwnEvents events={events} fetchEvents={fetchEvents} />
+      <OwnEvents events={events} fetchEvents={fetchEvents} loaded={loaded} />
     </>
   );
 };

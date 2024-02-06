@@ -24,7 +24,7 @@ const DashEvents = (props: OwnEventsProps) => {
         ))
       ) : (
         <Grid item xs={12}>
-          <NoEventsFound create={false} />
+          <NoEventsFound create />
         </Grid>
       )}
     </Grid>
